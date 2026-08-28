@@ -22,7 +22,9 @@ export function Reveal({
       return;
     }
     const observer = new IntersectionObserver(
-      ([entry]) => {
+      (entries) => {
+        const entry = entries[0];
+        if (!entry) return;
         if (entry.isIntersecting) {
           setVisible(true);
           observer.disconnect();
