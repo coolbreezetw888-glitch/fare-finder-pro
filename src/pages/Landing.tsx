@@ -1,27 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { BellRing, PlaneTakeoff, XCircle } from "lucide-react";
 
 import { Reveal } from "@/components/Reveal";
 import { Button } from "@/components/ui/button";
-
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Flight Price Notifier — 機票降價通知" },
-      {
-        name: "description",
-        content:
-          "設定台北出發的航線與目標價，機票降價就 email 通知你。Set a route and a target price — we email you when the fare drops.",
-      },
-      { property: "og:title", content: "Flight Price Notifier — 機票降價通知" },
-      {
-        property: "og:description",
-        content: "Set a route and a target price — we email you when the fare drops.",
-      },
-    ],
-  }),
-  component: Landing,
-});
+import { usePageMeta } from "@/lib/pageMeta";
 
 const features = [
   {
@@ -44,7 +26,13 @@ const features = [
   },
 ];
 
-function Landing() {
+export default function Landing() {
+  usePageMeta({
+    title: "Flight Price Notifier — 機票降價通知",
+    description:
+      "設定台北出發的航線與目標價，機票降價就 email 通知你。Set a route and a target price — we email you when the fare drops.",
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-30 border-b border-border/60 bg-background/80 backdrop-blur">
@@ -54,7 +42,7 @@ function Landing() {
             Flight Price Notifier
           </span>
           <Button asChild size="sm">
-            <Link to="/auth">Sign in / 登入</Link>
+            <Link to="/sign-in">Sign in / 登入</Link>
           </Button>
         </div>
       </header>

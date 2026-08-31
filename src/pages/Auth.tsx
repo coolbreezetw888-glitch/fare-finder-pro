@@ -1,44 +1,33 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { usePageMeta } from "@/lib/pageMeta";
 
-export const Route = createFileRoute("/auth")({
-  head: () => ({
-    meta: [
-      { title: "Sign in — Flight Price Notifier" },
-      {
-        name: "description",
-        content: "登入或註冊 Flight Price Notifier，開始追蹤台北出發的機票降價通知。",
-      },
-      { property: "og:title", content: "Sign in — Flight Price Notifier" },
-      {
-        property: "og:description",
-        content: "Sign in to Flight Price Notifier to watch flight fares from Taipei.",
-      },
-    ],
-  }),
-  component: AuthPage,
-});
+type Props = { mode: "signin" | "signup" };
 
-function AuthPage() {
+export default function AuthPage({ mode }: Props) {
+  usePageMeta({
+    title: "Sign in — Flight Price Notifier",
+    description: "登入或註冊 Flight Price Notifier，開始追蹤台北出發的機票降價通知。",
+  });
+
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard", replace: true });
+      if (data.session) navigate("/app", { replace: true });
     });
   }, [navigate]);
 
-  async function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setLoading(true);
     try {
@@ -50,14 +39,14 @@ function AuthPage() {
         });
         if (error) throw error;
         if (data.session) {
-          navigate({ to: "/dashboard", replace: true });
+          navigate("/app", { replace: true });
         } else {
           toast.success("請到信箱點擊確認連結 / Check your email to confirm your account.");
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate({ to: "/dashboard", replace: true });
+        navigate("/app", { replace: true });
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Something went wrong");
@@ -109,13 +98,12 @@ function AuthPage() {
             </Button>
           </form>
 
-          <button
-            type="button"
-            onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-            className="mt-4 w-full text-sm text-muted-foreground hover:text-foreground"
+          <Link
+            to={mode === "signin" ? "/sign-up" : "/sign-in"}
+            className="mt-4 block w-full text-center text-sm text-muted-foreground hover:text-foreground"
           >
             {mode === "signin" ? "還沒有帳號？註冊" : "已經有帳號？登入"}
-          </button>
+          </Link>
         </div>
       </div>
     </div>

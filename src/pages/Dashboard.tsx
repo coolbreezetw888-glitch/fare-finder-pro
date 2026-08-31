@@ -1,32 +1,38 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { PlaneTakeoff } from "lucide-react";
+import type { User } from "@supabase/supabase-js";
 
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { usePageMeta } from "@/lib/pageMeta";
 
-export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({
-    meta: [
-      { title: "Dashboard — Flight Price Notifier" },
-      { name: "description", content: "你的機票降價通知後台 / Your flight price alert dashboard." },
-      { property: "og:title", content: "Dashboard — Flight Price Notifier" },
-      { property: "og:description", content: "Your flight price alert dashboard." },
-    ],
-  }),
-  component: Dashboard,
-});
+export default function Dashboard() {
+  usePageMeta({
+    title: "Dashboard — Flight Price Notifier",
+    description: "你的機票降價通知後台 / Your flight price alert dashboard.",
+  });
 
-function Dashboard() {
-  const { user } = Route.useRouteContext();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    supabase.auth.getUser().then(({ data }) => {
+      if (!cancelled) setUser(data.user);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
     queryClient.clear();
     await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
+    navigate("/sign-in", { replace: true });
   }
 
   return (
@@ -45,7 +51,7 @@ function Dashboard() {
 
       <main className="mx-auto max-w-5xl px-5 py-14">
         <h1 className="text-2xl font-semibold tracking-tight">歡迎回來 / Welcome back</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{user.email}</p>
+        <p className="mt-2 text-sm text-muted-foreground">{user?.email}</p>
 
         <div className="mt-8 rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center">
           <p className="font-medium">航線訂閱功能即將上線</p>
